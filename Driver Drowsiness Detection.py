@@ -3,7 +3,7 @@ from scipy.spatial import distance as dist
 #from imutils.video import VideoStream
 from imutils.video import WebcamVideoStream
 from imutils import face_utils
-import argparse
+#import argparse
 import imutils
 import time
 import dlib
@@ -295,12 +295,12 @@ while True:
         #     cv2.circle(frame, (int(p[0]), int(p[1])), 3, (0, 0, 255), -1)
 
         (head_tilt_degree, start_point, end_point, end_point_alt) = getHeadTiltAndCoords(size, image_points, frame_height)
-        if(head_tilt_degree[0] > 10.5):
+        if(head_tilt_degree[0] > 16.5):
             cv2.putText(frame, 'Head Tilt Degree: ' + str(head_tilt_degree[0]), (170, 100),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-            winsound.Beep(freq,duration)
+            # winsound.Beep(freq,duration)
         # print(head_tilt_degree)
-        cv2.line(frame, start_point, end_point, (255, 0, 0), 2)
-        cv2.line(frame, start_point, end_point_alt, (0, 0, 255), 2)
+        # cv2.line(frame, start_point, end_point, (255, 0, 0), 2)
+        # cv2.line(frame, start_point, end_point_alt, (0, 0, 255), 2)
             
 
         # extract the mouth coordinates, then use the
