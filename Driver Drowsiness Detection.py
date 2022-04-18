@@ -58,7 +58,7 @@ image_points = np.array([
 (rStart, rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
 
 EYE_AR_THRESH = 0.23
-MOUTH_AR_THRESH = 0.70
+MOUTH_AR_THRESH = 0.72
 EYE_AR_CONSEC_FRAMES = 3
 COUNTER = 0
 
@@ -295,14 +295,13 @@ while True:
         #     cv2.circle(frame, (int(p[0]), int(p[1])), 3, (0, 0, 255), -1)
 
         (head_tilt_degree, start_point, end_point, end_point_alt) = getHeadTiltAndCoords(size, image_points, frame_height)
-        # if(head_tilt_degree[0] > 8.5):
-        #     winsound.Beep(freq,duration)
+        if(head_tilt_degree[0] > 10.5):
+            cv2.putText(frame, 'Head Tilt Degree: ' + str(head_tilt_degree[0]), (170, 100),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+            winsound.Beep(freq,duration)
         # print(head_tilt_degree)
-        # cv2.line(frame, start_point, end_point, (255, 0, 0), 2)
+        cv2.line(frame, start_point, end_point, (255, 0, 0), 2)
         cv2.line(frame, start_point, end_point_alt, (0, 0, 255), 2)
-
-        # if head_tilt_degree:
-        #     cv2.putText(frame, 'Head Tilt Degree: ' + str(head_tilt_degree[0]), (170, 20),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+            
 
         # extract the mouth coordinates, then use the
         # coordinates to compute the mouth aspect ratio
