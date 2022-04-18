@@ -10,15 +10,16 @@ import dlib
 import math
 from cv2 import cv2
 import numpy as np
-#from EAR import eye_aspect_ratio
-#from MAR import mouth_aspect_ratio
-#from HeadPose import getHeadTiltAndCoords
+import winsound
+
+freq = 2500
+duration = 1000
 
 
 # initialize dlib's face detector (HOG-based) and then create the
 # facial landmark predictor
 print("[INFO] loading facial landmark predictor...")
-detector = dlib.get_frontal_face_detector()
+detector = dlib.get_frontal_face_detector()     # used to retrieve facial information. returns history of oriented gradients.
 predictor = dlib.shape_predictor('./dlib_shape_predictor/shape_predictor_68_face_landmarks.dat')
 
 # initialize the video stream and sleep for a bit, allowing the
@@ -28,7 +29,6 @@ print("[INFO] initializing camera...")
 #vs = VideoStream(src=0).start()
 vs = WebcamVideoStream(src=0).start()
 
-# vs = VideoStream(usePiCamera=True).start() # Raspberry Pi
 time.sleep(2.0)
 
 # 400x225 to 1024x576
@@ -57,7 +57,7 @@ image_points = np.array([
 (lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
 (rStart, rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
 
-EYE_AR_THRESH = 0.25
+EYE_AR_THRESH = 0.26
 MOUTH_AR_THRESH = 0.70
 EYE_AR_CONSEC_FRAMES = 3
 COUNTER = 0
@@ -70,7 +70,7 @@ def mouth_aspect_ratio(mouth):
     A = dist.euclidean(mouth[2], mouth[10])  # 51, 59
     B = dist.euclidean(mouth[4], mouth[8])  # 53, 57
 
-    # compute the euclidean distance between the horizontal
+    # compute the euclidean distance between the horizontal 
     # mouth landmark (x, y)-coordinates
     C = dist.euclidean(mouth[0], mouth[6])  # 49, 55
 
@@ -95,10 +95,10 @@ def eye_aspect_ratio(eye):
     
 def isRotationMatrix(R):
     Rt = np.transpose(R)
-    shouldBeIdentity = np.dot(Rt, R)
-    I = np.identity(3, dtype=R.dtype)
-    n = np.linalg.norm(I - shouldBeIdentity)
-    return n < 1e-6
+    shouldBeIdentity = np.dot(Rt, R)    #Dot product
+    I = np.identity(3, dtype=R.dtype)   #identity matrix
+    n = np.linalg.norm(I - shouldBeIdentity)    #subtract
+    return n < 1e-6         #return bool
 
 
 # Calculates rotation matrix to euler angles
@@ -140,7 +140,7 @@ def getHeadTiltAndCoords(size, image_points, frame_height):
     rotation_matrix, _ = cv2.Rodrigues(rotation_vector)
 
     #calculate head tilt angle in degrees
-    head_tilt_degree = abs([-180] - np.rad2deg([rotationMatrixToEulerAngles(rotation_matrix)[0]]))
+    head_tilt_degree = abs([-180] - np.rad2deg([rotationMatrixToEulerAngles(rotation_matrix)[0]]))      #converts radian angle to degree and subtract from 180 to get face tilt angle.
 
     #calculate starting and ending points for the two lines for illustration
     starting_point = (int(image_points[0][0]), int(image_points[0][1]))
@@ -198,6 +198,7 @@ while True:
         rightEyeHull = cv2.convexHull(rightEye)
         cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
         cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
+        cv2.putText(frame, "EAR: {:.2f}".format(ear), (300, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
         # check to see if the eye aspect ratio is below the blink
         # threshold, and if so, increment the blink frame counter
@@ -206,7 +207,8 @@ while True:
             # if the eyes were closed for a sufficient number of times
             # then show the warning
             if COUNTER >= EYE_AR_CONSEC_FRAMES:
-                cv2.putText(frame, "Eyes Closed!", (500, 20),cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+                cv2.putText(frame, "Eyes Closed!", (450, 20),cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+                winsound.Beep(freq,duration)
             # otherwise, the eye aspect ratio is not below the blink
             # threshold, so reset the counter and alarm
         else:
@@ -226,6 +228,7 @@ while True:
         # Draw text if mouth is open
         if mar > MOUTH_AR_THRESH:
             cv2.putText(frame, "Yawning!", (800, 20),cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+            winsound.Beep(freq,duration)
 
 
         # loop over the (x, y)-coordinates for the facial landmarks
@@ -292,7 +295,9 @@ while True:
         #     cv2.circle(frame, (int(p[0]), int(p[1])), 3, (0, 0, 255), -1)
 
         (head_tilt_degree, start_point, end_point, end_point_alt) = getHeadTiltAndCoords(size, image_points, frame_height)
-
+        # if(head_tilt_degree[0] > 8.5):
+        #     winsound.Beep(freq,duration)
+        # print(head_tilt_degree)
         # cv2.line(frame, start_point, end_point, (255, 0, 0), 2)
         cv2.line(frame, start_point, end_point_alt, (0, 0, 255), 2)
 
@@ -301,6 +306,7 @@ while True:
 
         # extract the mouth coordinates, then use the
         # coordinates to compute the mouth aspect ratio
+
     # show the frameq
     cv2.imshow("Frame", frame)
     key = cv2.waitKey(1) & 0xFF
