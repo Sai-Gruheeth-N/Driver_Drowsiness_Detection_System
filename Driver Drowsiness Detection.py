@@ -57,7 +57,7 @@ image_points = np.array([
 (lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
 (rStart, rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
 
-EYE_AR_THRESH = 0.26
+EYE_AR_THRESH = 0.23
 MOUTH_AR_THRESH = 0.70
 EYE_AR_CONSEC_FRAMES = 3
 COUNTER = 0
