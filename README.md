@@ -1,0 +1,2 @@
+# Driver-Drowsiness-Detection-System
+A real time detection system. Follows a principle of offline training and online monitoring. Detection happens by detecting the driver's real time behaviour. Captures the driver's eye aspect ratio and mouth aspect ratio using OpenCV technology and gets predicted results from a pre-trained model and alerts the driver if found drowsy to prevent accidents/mishaps.
